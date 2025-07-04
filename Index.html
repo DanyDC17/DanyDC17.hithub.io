@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Diagnóstico Detallado (Estilo ICFES) - SEAMOSGENIOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .global-score-circle {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(#4f46e5 0deg, #374151 0deg);
+            transition: background 0.8s ease-out;
+        }
+        .level-badge {
+            padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;
+        }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background-color: #1f2937; color: #f3f4f6;
+            padding: 2rem; border-radius: 1rem; max-width: 90%; width: 600px;
+            max-height: 90vh; overflow-y: auto;
+            transform: scale(0.95); transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <header class="text-center mb-12">
+            <img src="https://i.ibb.co/SDVC1ssP/Copia-de-Seamos-Genios-20241115-011133-0000.png" alt="Logo SEAMOSGENIOS COLOMBIA" class="mx-auto h-24 sm:h-28 md:h-32 mb-4 rounded-3xl shadow-lg">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">Reporte de Desempeño Simulado</h1>
+            <p class="text-md sm:text-lg text-gray-300 mt-3 max-w-3xl mx-auto">Una herramienta de diagnóstico exclusiva de <strong>SEAMOSGENIOS</strong> para optimizar su preparación para la prueba Saber 11°.</p>
+        </header>
+
+        <!-- Dashboard Principal -->
+        <section class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+            <div class="lg:col-span-2 bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xl flex flex-col justify-center">
+                <div class="flex flex-col items-center">
+                    <h2 class="text-2xl font-bold text-white mb-5">Puntaje Global Simulado</h2>
+                    <div class="relative w-[200px] h-[200px] flex items-center justify-center">
+                        <div id="global-score-circle" class="global-score-circle"></div>
+                        <div class="relative z-10 text-center">
+                            <span id="global-score-value" class="text-6xl font-extrabold text-white">0</span>
+                            <span class="block text-sm text-gray-400">sobre 500</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="global-feedback" class="mt-6 text-center"></div>
+            </div>
+            <div class="lg:col-span-3 bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xl">
+                 <h2 class="text-2xl font-bold text-white mb-4 text-center">Perfil de Desempeño por Áreas</h2>
+                <div class="relative h-80 sm:h-96 w-full">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA a WhatsApp -->
+        <section class="bg-indigo-700 p-8 rounded-2xl shadow-2xl text-white mb-12">
+             <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
+                <div class="flex-shrink-0">
+                    <svg class="w-24 h-24 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a3.001 3.001 0 015.688 0M12 12a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                </div>
+                <div class="text-center lg:text-left flex-grow">
+                    <h3 class="text-2xl md:text-3xl font-bold">Únase a los Grupos de Estudio SEAMOSGENIOS</h3>
+                    <p class="text-lg mt-2 opacity-90">Forme parte de nuestros grupos de estudio a nivel nacional, patrocinados por el <strong>Pre-Intensivo SEAMOSGENIOS</strong>. Reciba apoyo, resuelva dudas y prepárese con estudiantes de todo el país.</p>
+                </div>
+                <div class="flex-shrink-0 mt-4 lg:mt-0">
+                    <a href="https://whatsapp.com/channel/0029Va4PUxRFHWpywWL6Tw3F" target="_blank" rel="noopener noreferrer" class="bg-white text-indigo-600 font-bold py-4 px-8 rounded-lg inline-block shadow-md hover:bg-gray-200 transition-transform transform hover:scale-105">
+                        Unirme a la Comunidad Nacional
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculadora -->
+        <div id="calculator" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+
+        <footer class="text-center p-6 mt-12">
+            <p class="text-sm text-gray-500">Una Herramienta de Diagnóstico Prémium de <strong>SEAMOSGENIOS COLOMBIA</strong></p>
+        </footer>
+    </div>
+    
+    <!-- Modal para Detalles del Nivel de Desempeño -->
+    <div id="detail-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div id="modal-header" class="flex justify-between items-center mb-4">
+                <h2 id="modal-title" class="text-2xl font-bold">Detalles del Nivel</h2>
+                <button id="close-modal-btn" class="text-3xl font-bold leading-none">&times;</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS DE NIVELES DE DESEMPEÑO ---
+        const performanceDetails = {
+            lectura: {
+                1: { title: "Nivel 1 (0-35)", general: "Identifica elementos literales en textos continuos y discontinuos sin establecer relaciones.", evidences: ["Reconoce información explícita.", "Localiza párrafos y enunciados; distingue proposición de párrafo."] },
+                2: { title: "Nivel 2 (36-50)", general: "Además del nivel 1, comprende textos de forma literal y reconoce relaciones básicas.", evidences: ["Identifica estructura textual.", "Encuentra sinónimos, antónimos.", "Detecta intención comunicativa.", "Reconoce relaciones de contraste, similitud, complementación.", "Percibe sentido local/global."] },
+                3: { title: "Nivel 3 (51-65)", general: "Interpreta información implícita, distingue estructuras, estrategias y valora argumentos.", evidences: ["Jerarquiza información.", "Realiza inferencias en textos continuos y discontinuos.", "Reconoce relaciones causa-efecto, oposición, etc.", "Analiza marcadores textuales, figuras literarias y estructura sintáctica.", "Sintetiza información; evalúa argumentos."] },
+                4: { title: "Nivel 4 (66-100)", general: "Reflexiona críticamente sobre la visión del autor, elementos paratextuales y aplica análisis literario.", evidences: ["Propone soluciones interpretativas.", "Evalúa estrategias discursivas.", "Relaciona dos o más textos.", "Usa conceptos de análisis literario.", "Considera contexto socio-ideológico.", "Construye argumentos propios; asume postura crítica.", "Formula hipótesis de lectura."] }
+            },
+            matematicas: {
+                1: { title: "Nivel 1 (0-35)", general: "Interpreta información puntual y situaciones cotidianas; identifica la tarea.", evidences: ["Lectura directa de datos numéricos y operaciones sencillas."] },
+                2: { title: "Nivel 2 (36-50)", general: "Diferencia posibles procedimientos; asocia conceptos básicos y patrones.", evidences: ["Selección de procedimientos matemáticos adecuados a problemas simples."] },
+                3: { title: "Nivel 3 (51-70)", general: "Analiza alternativas y elige la mejor solución. Relaciona variables y convierte datos en conclusiones.", evidences: ["Análisis de alternativas y elección de la mejor solución.", "Relación de variables y conversión de datos en conclusiones."] },
+                4: { title: "Nivel 4 (71-100)", general: "Deduce y combina conceptos, ecuaciones y procedimientos complejos.", evidences: ["Resolución de problemas nuevos mediante aplicaciones complejas.", "Modelado de fenómenos y justificación de decisiones basadas en datos."] }
+            },
+            sociales: {
+                1: { title: "Nivel 1 (0-40)", general: "Reconoce información básica: hechos, datos sencillos.", evidences: ["Uso de conceptos elementales en contextos históricos y geográficos."] },
+                2: { title: "Nivel 2 (41-55)", general: "Comprende relaciones entre hechos; interpreta conceptos básicos.", evidences: ["Explicación de relaciones simples y contexto de eventos sociales."] },
+                3: { title: "Nivel 3 (56-70)", general: "Analiza situaciones, relaciona fuentes, comprende argumentos e estructuras sociales.", evidences: ["Interpretación de múltiples perspectivas y análisis de fenómenos sociales."] },
+                4: { title: "Nivel 4 (71-100)", general: "Conoce disposiciones constitucionales, evalúa argumentos, propone soluciones aceptables socialmente.", evidences: ["Identificación de soluciones ciudadanas, argumentación en debates sociales."] }
+            },
+            ciencias: {
+                1: { title: "Nivel 1 (0-40)", general: "Reconoce información explícita en gráficos/tablas.", evidences: ["Extracción de datos directos sin interpretación profunda."] },
+                2: { title: "Nivel 2 (41-55)", general: "Identifica patrones, relaciona esquemas, hace predicciones básicas.", evidences: ["Reconocimiento de tendencias científicas a nivel básico."] },
+                3: { title: "Nivel 3 (56-70)", general: "Interrelaciona conceptos y leyes, distingue evidencia vs. conclusión y plantea hipótesis.", evidences: ["Análisis crítico de datos empíricos y formulación de hipótesis."] },
+                4: { title: "Nivel 4 (71-100)", general: "Aplica conceptos, teorías y leyes para resolver situaciones complejas.", evidences: ["Argumentación científica y justificación de soluciones."] }
+            },
+            ingles: {
+                1: { title: "Nivel A- (0-47)", general: "Por debajo de A1. Vocabulario y estructuras muy básicos.", evidences: ["No alcanza el nivel mínimo para ser clasificado en A1."] },
+                2: { title: "Nivel A1 (48-57)", general: "Comprende y utiliza expresiones cotidianas y frases muy sencillas.", evidences: ["Puede presentarse a sí mismo y a otros, pedir y dar información personal básica."] },
+                3: { title: "Nivel A2 (58-67)", general: "Comprende frases y expresiones de uso frecuente relacionadas con áreas de experiencia que son de importancia inmediata.", evidences: ["Puede comunicarse en tareas simples y habituales que requieren un intercambio simple y directo de información."] },
+                4.5: { title: "Nivel B1 (68-78)", general: "Es capaz de comprender los puntos principales de textos claros y en lengua estándar si tratan sobre cuestiones que le son conocidas.", evidences: ["Sabe desenvolverse en la mayor parte de las situaciones que pueden surgir durante un viaje.", "Es capaz de producir textos sencillos y coherentes sobre temas que le son familiares."] },
+                5: { title: "Nivel B+ (79-100)", general: "Supera el nivel B1. Es capaz de entender las ideas principales de textos complejos.", evidences: ["Puede relacionarse con hablantes nativos con un grado suficiente de fluidez y naturalidad.", "Puede producir textos claros y detallados sobre temas diversos."] }
+            }
+        };
+
+        // --- LÓGICA DE CÁLCULO Y CONFIGURACIÓN ---
+        function linearInterpolation(e, minE, maxE, minS, maxS) {
+            if (e <= minE) return minS; if (e >= maxE) return maxS;
+            return Math.round(minS - ((e - minE) / (maxE - minE)) * (minS - maxS));
+        }
+
+        const scoringRules = {
+            'matematicas': e => { if (e === 0) return 100; if (e === 1) return 82; if (e >= 2 && e <= 6) return linearInterpolation(e, 2, 6, 80, 69); if (e >= 7 && e <= 15) return linearInterpolation(e, 7, 15, 67, 56); if (e >= 16 && e <= 20) return linearInterpolation(e, 16, 20, 55, 49); if (e >= 21 && e <= 30) return linearInterpolation(e, 21, 30, 48, 36); if (e >= 31 && e <= 40) return 31; return 20; },
+            'lectura': e => { if (e === 0) return 100; if (e === 1) return 80; if (e >= 2 && e <= 6) return linearInterpolation(e, 2, 6, 79, 66); if (e >= 7 && e <= 15) return linearInterpolation(e, 7, 15, 64, 40); if (e >= 16 && e <= 21) return linearInterpolation(e, 16, 21, 39, 21); return 20; },
+            'sociales': e => { if (e === 0) return 100; if (e === 1) return 82; if (e >= 2 && e <= 6) return linearInterpolation(e, 2, 6, 80, 68); if (e >= 7 && e <= 15) return linearInterpolation(e, 7, 15, 67, 56); if (e >= 16 && e <= 20) return linearInterpolation(e, 16, 20, 55, 49); if (e >= 21 && e <= 30) return linearInterpolation(e, 21, 30, 48, 36); if (e >= 31 && e <= 40) return 31; return 20; },
+            'ciencias': e => { if (e === 0) return 100; if (e === 1) return 81; if (e >= 2 && e <= 6) return linearInterpolation(e, 2, 6, 79, 68); if (e >= 7 && e <= 15) return linearInterpolation(e, 7, 15, 67, 56); if (e >= 16 && e <= 20) return linearInterpolation(e, 16, 20, 55, 49); if (e >= 21 && e <= 30) return linearInterpolation(e, 21, 30, 48, 36); if (e >= 31 && e <= 40) return 31; return 20; },
+            'ingles': e => { if (e === 0) return 100; if (e === 1) return 83; if (e >= 2 && e <= 6) return linearInterpolation(e, 2, 6, 81, 70); if (e >= 7 && e <= 15) return linearInterpolation(e, 7, 15, 68, 56); if (e >= 16 && e <= 20) return linearInterpolation(e, 16, 20, 55, 49); if (e >= 21 && e <= 30) return 36; if (e >= 31 && e <= 40) return 31; return 20; }
+        };
+
+        const subjects = [
+            { id: 'matematicas', name: '🧮 Matemáticas', color: 'bg-blue-500' },
+            { id: 'lectura', name: '📖 Lectura Crítica', color: 'bg-red-500' },
+            { id: 'sociales', name: '🧠 Sociales y Ciudadanas', color: 'bg-violet-500' },
+            { id: 'ciencias', name: '🔬 Ciencias Naturales', color: 'bg-green-500' },
+            { id: 'ingles', name: '🌍 Inglés', color: 'bg-indigo-500' }
+        ];
+
+        let currentScores = {};
+        let performanceChart;
+
+        // --- FUNCIÓN PARA CREAR TARJETAS (AÑADIDA) ---
+        function createSubjectCard(subject) {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-800 p-6 rounded-2xl shadow-lg flex flex-col';
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-bold text-white">${subject.name}</h3>
+                    <span id="level-${subject.id}" class="level-badge"></span>
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="errors-${subject.id}" class="text-gray-400 whitespace-nowrap">N° Errores:</label>
+                    <input type="number" id="errors-${subject.id}" value="0" min="0" class="w-full bg-gray-700 text-white p-2 rounded-md border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="text-center mb-4">
+                    <span class="text-5xl font-bold text-white" id="score-${subject.id}">100</span>
+                    <span class="text-gray-400">/ 100</span>
+                </div>
+                <!-- Barra de Progreso (NUEVO) -->
+                <div class="w-full bg-gray-700 rounded-full h-2.5 mb-4">
+                    <div id="progress-${subject.id}" class="${subject.color} h-2.5 rounded-full transition-all duration-500" style="width: 100%;"></div>
+                </div>
+                <button id="details-btn-${subject.id}" class="mt-auto w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors">
+                    Ver Detalles de Nivel
+                </button>
+            `;
+            return card;
+        }
+
+        function getPerformanceLevel(subjectId, score) {
+            switch (subjectId) {
+                case 'lectura':
+                    if (score <= 35) return 1; if (score <= 50) return 2; if (score <= 65) return 3; return 4;
+                case 'matematicas':
+                    if (score <= 35) return 1; if (score <= 50) return 2; if (score <= 70) return 3; return 4;
+                case 'sociales':
+                    if (score <= 40) return 1; if (score <= 55) return 2; if (score <= 70) return 3; return 4;
+                case 'ciencias':
+                    if (score <= 40) return 1; if (score <= 55) return 2; if (score <= 70) return 3; return 4;
+                case 'ingles':
+                    if (score <= 47) return 1; if (score <= 57) return 2; if (score <= 67) return 3; if (score <= 78) return 4.5; return 5;
+                default: return 1;
+            }
+        }
+        
+        function getLevelStyle(levelKey) {
+            const levelNum = Math.floor(levelKey);
+            if (levelNum === 4 || levelNum === 5) return { color: 'bg-blue-600', text: 'text-white' };
+            if (levelNum === 3) return { color: 'bg-green-600', text: 'text-white' };
+            if (levelNum === 2) return { color: 'bg-yellow-500', text: 'text-gray-900' };
+            return { color: 'bg-red-600', text: 'text-white' };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculatorContainer = document.getElementById('calculator');
+            subjects.forEach(subject => {
+                currentScores[subject.id] = 100;
+                // Se llama a la función para crear y añadir la tarjeta
+                calculatorContainer.appendChild(createSubjectCard(subject));
+                document.getElementById(`errors-${subject.id}`).addEventListener('input', (e) => handleInput(e, subject));
+                document.getElementById(`details-btn-${subject.id}`).addEventListener('click', () => showDetailsModal(subject.id));
+            });
+            
+            initializeChart();
+            updateAll(true);
+            
+            const modal = document.getElementById('detail-modal');
+            document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.remove('active'));
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+        });
+
+        function handleInput(event, subject) {
+            let errors = parseInt(event.target.value) || 0;
+            if (errors < 0) errors = 0;
+            event.target.value = errors;
+            
+            const score = scoringRules[subject.id](errors);
+            currentScores[subject.id] = score;
+            
+            const levelKey = getPerformanceLevel(subject.id, score);
+            const levelData = performanceDetails[subject.id][levelKey];
+            const style = getLevelStyle(levelKey);
+
+            const levelBadge = docu
